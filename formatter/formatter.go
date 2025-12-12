@@ -41,15 +41,15 @@ type OutputMetadata struct {
 
 // JSONOutput represents the complete JSON output structure
 type JSONOutput struct {
-	Metadata        OutputMetadata             `json:"metadata"`
-	ManifestsFound  int                        `json:"manifestsFound"`
-	ManifestFiles   []scanner.DetectedFile     `json:"manifestFiles"`
-	Audits          []JSONAuditResult          `json:"audits"`
-	PythonAudits    []JSONPythonAuditResult    `json:"pythonAudits,omitempty"`
-	GoAudits        []JSONGoAuditResult        `json:"goAudits,omitempty"`
-	MavenAudits     []JSONMavenAuditResult     `json:"mavenAudits,omitempty"`
-	TotalVulns      int                        `json:"totalVulnerabilities"`
-	Summary         audit.VulnerabilitySummary `json:"summary"`
+	Metadata       OutputMetadata             `json:"metadata"`
+	ManifestsFound int                        `json:"manifestsFound"`
+	ManifestFiles  []scanner.DetectedFile     `json:"manifestFiles"`
+	Audits         []JSONAuditResult          `json:"audits"`
+	PythonAudits   []JSONPythonAuditResult    `json:"pythonAudits,omitempty"`
+	GoAudits       []JSONGoAuditResult        `json:"goAudits,omitempty"`
+	MavenAudits    []JSONMavenAuditResult     `json:"mavenAudits,omitempty"`
+	TotalVulns     int                        `json:"totalVulnerabilities"`
+	Summary        audit.VulnerabilitySummary `json:"summary"`
 }
 
 // JSONAuditResult represents audit results for a single package.json
@@ -62,11 +62,11 @@ type JSONAuditResult struct {
 
 // JSONPythonAuditResult represents audit results for a single Python manifest
 type JSONPythonAuditResult struct {
-	ManifestPath    string                        `json:"manifestPath"`
-	ManifestType    string                        `json:"manifestType"`
-	Vulnerabilities []audit.PythonVulnerability   `json:"vulnerabilities"`
-	Summary         audit.VulnerabilitySummary    `json:"summary"`
-	Error           string                        `json:"error,omitempty"`
+	ManifestPath    string                      `json:"manifestPath"`
+	ManifestType    string                      `json:"manifestType"`
+	Vulnerabilities []audit.PythonVulnerability `json:"vulnerabilities"`
+	Summary         audit.VulnerabilitySummary  `json:"summary"`
+	Error           string                      `json:"error,omitempty"`
 }
 
 // JSONGoAuditResult represents audit results for a single Go manifest
@@ -80,11 +80,11 @@ type JSONGoAuditResult struct {
 
 // JSONMavenAuditResult represents audit results for a single Maven manifest
 type JSONMavenAuditResult struct {
-	ManifestPath    string                        `json:"manifestPath"`
-	ManifestType    string                        `json:"manifestType"`
-	Vulnerabilities []audit.MavenVulnerability    `json:"vulnerabilities"`
-	Summary         audit.VulnerabilitySummary    `json:"summary"`
-	Error           string                        `json:"error,omitempty"`
+	ManifestPath    string                     `json:"manifestPath"`
+	ManifestType    string                     `json:"manifestType"`
+	Vulnerabilities []audit.MavenVulnerability `json:"vulnerabilities"`
+	Summary         audit.VulnerabilitySummary `json:"summary"`
+	Error           string                     `json:"error,omitempty"`
 }
 
 // Formatter interface for different output formatters

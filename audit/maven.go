@@ -9,24 +9,24 @@ import (
 
 // MavenVulnerability represents a security vulnerability in a Maven package
 type MavenVulnerability struct {
-	GroupID      string   `json:"group_id"`
-	ArtifactID   string   `json:"artifact_id"`
-	Version      string   `json:"version"`
-	ID           string   `json:"id"`
-	FixVersions  []string `json:"fix_versions"`
-	Description  string   `json:"description"`
-	Aliases      []string `json:"aliases"`
-	Severity     string   `json:"severity"`
+	GroupID     string   `json:"group_id"`
+	ArtifactID  string   `json:"artifact_id"`
+	Version     string   `json:"version"`
+	ID          string   `json:"id"`
+	FixVersions []string `json:"fix_versions"`
+	Description string   `json:"description"`
+	Aliases     []string `json:"aliases"`
+	Severity    string   `json:"severity"`
 }
 
 // MavenAuditResult contains the results of running Maven vulnerability check
 type MavenAuditResult struct {
-	ManifestPath     string
-	ManifestType     string
-	Vulnerabilities  []MavenVulnerability
-	Summary          VulnerabilitySummary
-	PackagesScanned  int
-	Error            error
+	ManifestPath    string
+	ManifestType    string
+	Vulnerabilities []MavenVulnerability
+	Summary         VulnerabilitySummary
+	PackagesScanned int
+	Error           error
 }
 
 // RunMavenAudit checks Maven dependencies for vulnerabilities using OSV API

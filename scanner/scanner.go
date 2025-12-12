@@ -39,7 +39,7 @@ type DetectedFile struct {
 
 // ScanResult contains the results of scanning a directory
 type ScanResult struct {
-	Files []DetectedFile
+	Files  []DetectedFile
 	Errors []error
 }
 

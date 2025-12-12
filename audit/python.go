@@ -20,12 +20,12 @@ type PythonVulnerability struct {
 
 // PythonAuditResult contains the results of running Python vulnerability check
 type PythonAuditResult struct {
-	ManifestPath     string
-	ManifestType     string
-	Vulnerabilities  []PythonVulnerability
-	Summary          VulnerabilitySummary
-	PackagesScanned  int
-	Error            error
+	ManifestPath    string
+	ManifestType    string
+	Vulnerabilities []PythonVulnerability
+	Summary         VulnerabilitySummary
+	PackagesScanned int
+	Error           error
 }
 
 // RunPythonAudit checks Python packages for vulnerabilities using OSV API

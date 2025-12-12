@@ -8,11 +8,11 @@ import (
 
 func TestNew(t *testing.T) {
 	tests := []struct {
-		name      string
-		path      string
-		verbose   bool
-		wantErr   bool
-		errMsg    string
+		name    string
+		path    string
+		verbose bool
+		wantErr bool
+		errMsg  string
 	}{
 		{
 			name:    "valid directory",

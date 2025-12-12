@@ -60,19 +60,19 @@ type AuditMetadata struct {
 
 // NpmAuditResponse represents the JSON response from npm audit
 type NpmAuditResponse struct {
-	AuditReportVersion int                       `json:"auditReportVersion"`
-	Vulnerabilities    map[string]Vulnerability  `json:"vulnerabilities"`
-	Metadata           AuditMetadata             `json:"metadata"`
+	AuditReportVersion int                      `json:"auditReportVersion"`
+	Vulnerabilities    map[string]Vulnerability `json:"vulnerabilities"`
+	Metadata           AuditMetadata            `json:"metadata"`
 }
 
 // AuditResult contains the results of running npm audit
 type AuditResult struct {
-	PackageJSONPath  string
-	Response         *NpmAuditResponse
-	Vulnerabilities  []Vulnerability
-	Summary          VulnerabilitySummary
-	RawOutput        string
-	Error            error
+	PackageJSONPath string
+	Response        *NpmAuditResponse
+	Vulnerabilities []Vulnerability
+	Summary         VulnerabilitySummary
+	RawOutput       string
+	Error           error
 }
 
 // Runner handles npm audit execution

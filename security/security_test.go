@@ -34,10 +34,10 @@ func TestLevenshteinDistance(t *testing.T) {
 
 func TestCheckTyposquatting(t *testing.T) {
 	tests := []struct {
-		name           string
-		packageName    string
-		threshold      int
-		expectRisk     bool
+		name            string
+		packageName     string
+		threshold       int
+		expectRisk      bool
 		expectedSimilar string
 	}{
 		{
@@ -47,17 +47,17 @@ func TestCheckTyposquatting(t *testing.T) {
 			expectRisk:  false,
 		},
 		{
-			name:           "close typo (raect)",
-			packageName:    "raect",
-			threshold:      2,
-			expectRisk:     true,
+			name:            "close typo (raect)",
+			packageName:     "raect",
+			threshold:       2,
+			expectRisk:      true,
 			expectedSimilar: "react",
 		},
 		{
-			name:           "single char typo (lodesh)",
-			packageName:    "lodesh",
-			threshold:      2,
-			expectRisk:     true,
+			name:            "single char typo (lodesh)",
+			packageName:     "lodesh",
+			threshold:       2,
+			expectRisk:      true,
 			expectedSimilar: "lodash",
 		},
 		{
@@ -67,10 +67,10 @@ func TestCheckTyposquatting(t *testing.T) {
 			expectRisk:  false,
 		},
 		{
-			name:           "subtle typo (expres)",
-			packageName:    "expres",
-			threshold:      2,
-			expectRisk:     true,
+			name:            "subtle typo (expres)",
+			packageName:     "expres",
+			threshold:       2,
+			expectRisk:      true,
 			expectedSimilar: "express",
 		},
 	}
@@ -120,11 +120,11 @@ func TestCheckTyposquattingThreshold(t *testing.T) {
 
 func TestAnalyzeMaintainerRisk(t *testing.T) {
 	tests := []struct {
-		name                string
-		metadata            *PackageMetadata
-		expectRisk          bool
-		expectedRiskLevel   string
-		expectedIssueCount  int
+		name               string
+		metadata           *PackageMetadata
+		expectRisk         bool
+		expectedRiskLevel  string
+		expectedIssueCount int
 	}{
 		{
 			name: "well maintained package",
