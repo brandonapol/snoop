@@ -48,17 +48,60 @@ make install
 ### Using Go
 
 ```bash
+# Install latest version
 go install github.com/brandonapol/snoop@latest
+
+# Install specific version
+go install github.com/brandonapol/snoop@v0.1.0
 ```
 
 ### Pre-built Binaries
 
 Download the latest release for your platform from the [releases page](https://github.com/brandonapol/snoop/releases).
 
+#### Quick Install (Linux/macOS)
+
 ```bash
-# Linux/macOS
-curl -sSL https://github.com/brandonapol/snoop/releases/latest/download/snoop-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m) -o /usr/local/bin/snoop
+# Linux x86_64
+curl -sSL https://github.com/brandonapol/snoop/releases/download/v0.1.0/snoop-linux-amd64 -o /usr/local/bin/snoop
 chmod +x /usr/local/bin/snoop
+
+# Linux ARM64
+curl -sSL https://github.com/brandonapol/snoop/releases/download/v0.1.0/snoop-linux-arm64 -o /usr/local/bin/snoop
+chmod +x /usr/local/bin/snoop
+
+# macOS Intel
+curl -sSL https://github.com/brandonapol/snoop/releases/download/v0.1.0/snoop-darwin-amd64 -o /usr/local/bin/snoop
+chmod +x /usr/local/bin/snoop
+
+# macOS Apple Silicon
+curl -sSL https://github.com/brandonapol/snoop/releases/download/v0.1.0/snoop-darwin-arm64 -o /usr/local/bin/snoop
+chmod +x /usr/local/bin/snoop
+
+# Windows (PowerShell)
+Invoke-WebRequest -Uri "https://github.com/brandonapol/snoop/releases/download/v0.1.0/snoop-windows-amd64.exe" -OutFile "snoop.exe"
+```
+
+#### Auto-detect Platform (Linux/macOS)
+
+```bash
+# Automatically download the correct binary for your platform
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then ARCH="amd64"; fi
+if [ "$ARCH" = "aarch64" ]; then ARCH="arm64"; fi
+
+curl -sSL "https://github.com/brandonapol/snoop/releases/download/v0.1.0/snoop-${OS}-${ARCH}" -o /usr/local/bin/snoop
+chmod +x /usr/local/bin/snoop
+```
+
+### Verify Installation
+
+```bash
+# Check version
+snoop --version
+
+# Output: snoop version 0.1.0
 ```
 
 ## Uninstallation
