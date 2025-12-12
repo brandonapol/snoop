@@ -1,5 +1,10 @@
 # Snoop - Multi-Language Security Audit CLI
 
+[![CI](https://github.com/brandonapol/snoop/actions/workflows/ci.yml/badge.svg)](https://github.com/brandonapol/snoop/actions/workflows/ci.yml)
+[![Release](https://github.com/brandonapol/snoop/actions/workflows/release.yml/badge.svg)](https://github.com/brandonapol/snoop/actions/workflows/release.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/brandonapol/snoop)](https://goreportcard.com/report/github.com/brandonapol/snoop)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > **🏆 Vibelympics Coding Competition - Round 2 Submission**
 >
 > This project was created for the [Vibelympics coding competition](https://github.com/brandonapol/vibelympics). It is maintained as a git submodule at `/round_2` in the main vibelympics repository.
