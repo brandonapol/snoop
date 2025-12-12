@@ -64,12 +64,17 @@ func TestScan(t *testing.T) {
 	// Create a temporary directory structure for testing
 	tmpDir := t.TempDir()
 
-	// Create test manifest files
+	// Create test manifest files (Node.js and Python)
 	testFiles := map[string]ManifestType{
 		"package.json":      PackageJSON,
 		"package-lock.json": PackageLockJSON,
 		"yarn.lock":         YarnLock,
 		"pnpm-lock.yaml":    PnpmLockYAML,
+		"requirements.txt":  RequirementsTxt,
+		"Pipfile":           Pipfile,
+		"Pipfile.lock":      PipfileLock,
+		"poetry.lock":       PoetryLock,
+		"pyproject.toml":    PyprojectTOML,
 	}
 
 	for filename := range testFiles {
@@ -97,6 +102,15 @@ func TestScan(t *testing.T) {
 		t.Fatalf("Failed to create node_modules package.json: %v", err)
 	}
 
+	// Create venv directory (should be skipped)
+	venv := filepath.Join(tmpDir, "venv")
+	if err := os.Mkdir(venv, 0755); err != nil {
+		t.Fatalf("Failed to create venv: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(venv, "requirements.txt"), []byte(""), 0644); err != nil {
+		t.Fatalf("Failed to create venv requirements.txt: %v", err)
+	}
+
 	// Run the scanner
 	scanner, err := New(tmpDir, false)
 	if err != nil {
@@ -119,9 +133,9 @@ func TestScan(t *testing.T) {
 		foundTypes[file.Type]++
 	}
 
-	// We expect 4 manifest types in root + 1 package.json in subdir = 5 total
-	// node_modules should be skipped so that package.json shouldn't be counted
-	expectedTotal := 5
+	// We expect 9 manifest types in root (4 Node.js + 5 Python) + 1 package.json in subdir = 10 total
+	// node_modules and venv should be skipped
+	expectedTotal := 10
 	if len(result.Files) != expectedTotal {
 		t.Errorf("Scan() found %d files, expected %d", len(result.Files), expectedTotal)
 	}
@@ -131,8 +145,15 @@ func TestScan(t *testing.T) {
 		t.Errorf("Scan() found %d package.json files, expected 2", foundTypes[PackageJSON])
 	}
 
-	// Verify we have 1 of each other type
+	// Verify we have 1 of each Node.js manifest type
 	for _, manifestType := range []ManifestType{PackageLockJSON, YarnLock, PnpmLockYAML} {
+		if foundTypes[manifestType] != 1 {
+			t.Errorf("Scan() found %d %s files, expected 1", foundTypes[manifestType], manifestType)
+		}
+	}
+
+	// Verify we have 1 of each Python manifest type
+	for _, manifestType := range []ManifestType{RequirementsTxt, Pipfile, PipfileLock, PoetryLock, PyprojectTOML} {
 		if foundTypes[manifestType] != 1 {
 			t.Errorf("Scan() found %d %s files, expected 1", foundTypes[manifestType], manifestType)
 		}
@@ -142,6 +163,13 @@ func TestScan(t *testing.T) {
 	for _, file := range result.Files {
 		if filepath.Dir(file.Path) == nodeModules {
 			t.Errorf("Scan() should have skipped node_modules but found file: %s", file.Path)
+		}
+	}
+
+	// Verify venv was skipped
+	for _, file := range result.Files {
+		if filepath.Dir(file.Path) == venv {
+			t.Errorf("Scan() should have skipped venv but found file: %s", file.Path)
 		}
 	}
 }
@@ -234,7 +262,7 @@ func TestSummary(t *testing.T) {
 			result: &ScanResult{
 				Files: []DetectedFile{},
 			},
-			contains: []string{"No Node.js package manifests found"},
+			contains: []string{"No package manifests found"},
 		},
 	}
 
@@ -243,6 +271,58 @@ func TestSummary(t *testing.T) {
 			summary := tt.result.Summary()
 			if summary == "" {
 				t.Errorf("Summary() returned empty string")
+			}
+		})
+	}
+}
+
+func TestIsNodeJSManifest(t *testing.T) {
+	tests := []struct {
+		manifestType ManifestType
+		expected     bool
+	}{
+		{PackageJSON, true},
+		{PackageLockJSON, true},
+		{YarnLock, true},
+		{PnpmLockYAML, true},
+		{RequirementsTxt, false},
+		{Pipfile, false},
+		{PipfileLock, false},
+		{PoetryLock, false},
+		{PyprojectTOML, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.manifestType), func(t *testing.T) {
+			result := IsNodeJSManifest(tt.manifestType)
+			if result != tt.expected {
+				t.Errorf("IsNodeJSManifest(%q) = %v, expected %v", tt.manifestType, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsPythonManifest(t *testing.T) {
+	tests := []struct {
+		manifestType ManifestType
+		expected     bool
+	}{
+		{PackageJSON, false},
+		{PackageLockJSON, false},
+		{YarnLock, false},
+		{PnpmLockYAML, false},
+		{RequirementsTxt, true},
+		{Pipfile, true},
+		{PipfileLock, true},
+		{PoetryLock, true},
+		{PyprojectTOML, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.manifestType), func(t *testing.T) {
+			result := IsPythonManifest(tt.manifestType)
+			if result != tt.expected {
+				t.Errorf("IsPythonManifest(%q) = %v, expected %v", tt.manifestType, result, tt.expected)
 			}
 		})
 	}

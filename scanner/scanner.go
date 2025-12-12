@@ -6,14 +6,29 @@ import (
 	"path/filepath"
 )
 
-// ManifestType represents the type of Node.js package manifest
+// ManifestType represents the type of package manifest (Node.js or Python)
 type ManifestType string
 
 const (
+	// Node.js manifest types
 	PackageJSON     ManifestType = "package.json"
 	PackageLockJSON ManifestType = "package-lock.json"
 	YarnLock        ManifestType = "yarn.lock"
 	PnpmLockYAML    ManifestType = "pnpm-lock.yaml"
+
+	// Python manifest types
+	RequirementsTxt ManifestType = "requirements.txt"
+	Pipfile         ManifestType = "Pipfile"
+	PipfileLock     ManifestType = "Pipfile.lock"
+	PoetryLock      ManifestType = "poetry.lock"
+	PyprojectTOML   ManifestType = "pyproject.toml"
+
+	// Go manifest types
+	GoMod ManifestType = "go.mod"
+	GoSum ManifestType = "go.sum"
+
+	// Maven/Java manifest types
+	PomXML ManifestType = "pom.xml"
 )
 
 // DetectedFile represents a detected manifest file
@@ -30,13 +45,28 @@ type ScanResult struct {
 
 // manifestFiles is the list of files we're looking for
 var manifestFiles = []string{
+	// Node.js manifests
 	string(PackageJSON),
 	string(PackageLockJSON),
 	string(YarnLock),
 	string(PnpmLockYAML),
+
+	// Python manifests
+	string(RequirementsTxt),
+	string(Pipfile),
+	string(PipfileLock),
+	string(PoetryLock),
+	string(PyprojectTOML),
+
+	// Go manifests
+	string(GoMod),
+	string(GoSum),
+
+	// Maven/Java manifests
+	string(PomXML),
 }
 
-// Scanner handles directory scanning for Node.js manifest files
+// Scanner handles directory scanning for Node.js, Python, Go, and Maven manifest files
 type Scanner struct {
 	rootPath string
 	verbose  bool
@@ -63,7 +93,7 @@ func New(rootPath string, verbose bool) (*Scanner, error) {
 	}, nil
 }
 
-// Scan walks the directory tree and detects all Node.js manifest files
+// Scan walks the directory tree and detects all Node.js, Python, Go, and Maven manifest files
 func (s *Scanner) Scan() (*ScanResult, error) {
 	result := &ScanResult{
 		Files:  make([]DetectedFile, 0),
@@ -79,13 +109,40 @@ func (s *Scanner) Scan() (*ScanResult, error) {
 
 		// Skip directories
 		if info.IsDir() {
+			dirName := info.Name()
+
 			// Skip node_modules directories to avoid deep recursion
-			if info.Name() == "node_modules" {
+			if dirName == "node_modules" {
 				if s.verbose {
 					fmt.Printf("Skipping node_modules: %s\n", path)
 				}
 				return filepath.SkipDir
 			}
+
+			// Skip Python virtual environment directories
+			if dirName == "venv" || dirName == ".venv" || dirName == "env" || dirName == ".env" || dirName == "__pycache__" {
+				if s.verbose {
+					fmt.Printf("Skipping Python directory: %s\n", path)
+				}
+				return filepath.SkipDir
+			}
+
+			// Skip Go vendor directory
+			if dirName == "vendor" {
+				if s.verbose {
+					fmt.Printf("Skipping vendor directory: %s\n", path)
+				}
+				return filepath.SkipDir
+			}
+
+			// Skip Maven target directory
+			if dirName == "target" {
+				if s.verbose {
+					fmt.Printf("Skipping Maven target directory: %s\n", path)
+				}
+				return filepath.SkipDir
+			}
+
 			return nil
 		}
 
@@ -135,7 +192,7 @@ func (r *ScanResult) HasManifests() bool {
 // Summary returns a summary of detected files
 func (r *ScanResult) Summary() string {
 	if len(r.Files) == 0 {
-		return "No Node.js package manifests found"
+		return "No package manifests found"
 	}
 
 	counts := make(map[ManifestType]int)
@@ -149,4 +206,24 @@ func (r *ScanResult) Summary() string {
 	}
 
 	return summary
+}
+
+// IsNodeJSManifest returns true if the manifest type is for Node.js
+func IsNodeJSManifest(t ManifestType) bool {
+	return t == PackageJSON || t == PackageLockJSON || t == YarnLock || t == PnpmLockYAML
+}
+
+// IsPythonManifest returns true if the manifest type is for Python
+func IsPythonManifest(t ManifestType) bool {
+	return t == RequirementsTxt || t == Pipfile || t == PipfileLock || t == PoetryLock || t == PyprojectTOML
+}
+
+// IsGoManifest returns true if the manifest type is for Go
+func IsGoManifest(t ManifestType) bool {
+	return t == GoMod || t == GoSum
+}
+
+// IsMavenManifest returns true if the manifest type is for Maven/Java
+func IsMavenManifest(t ManifestType) bool {
+	return t == PomXML
 }

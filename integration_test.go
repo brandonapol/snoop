@@ -580,7 +580,7 @@ func TestRequirement_NoManifestsFound(t *testing.T) {
 	output, _ := cmd.CombinedOutput()
 
 	outputStr := string(output)
-	if !strings.Contains(outputStr, "No Node.js package manifests found") {
+	if !strings.Contains(outputStr, "No package manifests found") {
 		t.Errorf("Should clearly indicate when no manifests found. Got: %s", outputStr)
 	}
 }

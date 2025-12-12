@@ -1,11 +1,21 @@
-# Snoop - Node.js Security Audit CLI
+# Snoop - Multi-Language Security Audit CLI
 
-A comprehensive command-line security audit tool for Node.js projects. Snoop automatically detects package manifests, runs security audits, and identifies potential supply chain risks including typosquatting, outdated packages, and suspicious patterns.
+A comprehensive command-line security audit tool for Node.js, Python, Go, and Maven/Java projects. Snoop automatically detects package manifests, runs security audits using built-in vulnerability databases, and identifies potential supply chain risks including typosquatting, outdated packages, and suspicious patterns.
 
 ## Features
 
-- **Automatic Package Detection**: Finds `package.json`, `package-lock.json`, `yarn.lock`, and `pnpm-lock.yaml` files
-- **npm Audit Integration**: Runs `npm audit` and parses vulnerabilities
+### Multi-Language Support
+- **Node.js Support**: Detects `package.json`, `package-lock.json`, `yarn.lock`, and `pnpm-lock.yaml` files
+- **Python Support**: Detects `requirements.txt`, `Pipfile`, `pyproject.toml`, and `poetry.lock` files
+- **Go Support**: Detects `go.mod` and `go.sum` files
+- **Maven/Java Support**: Detects `pom.xml` files
+- **Built-in Vulnerability Scanning**: Uses OSV (Open Source Vulnerabilities) database for Python, Go, and Maven - no external tools required!
+
+### Security Features
+- **npm Audit Integration**: Runs `npm audit` and parses vulnerabilities for Node.js packages
+- **Native Python Scanning**: Built-in vulnerability checking using OSV API (no pip-audit required)
+- **Native Go Scanning**: Built-in vulnerability checking using OSV API (no govulncheck required)
+- **Native Maven Scanning**: Built-in vulnerability checking using OSV API (no external Maven plugins required)
 - **Typosquatting Detection**: Uses Levenshtein distance to detect potential typosquatting attacks
 - **Maintainer Risk Analysis**: Flags packages with single maintainers or outdated versions
 - **Suspicious Pattern Detection**: Identifies risky install scripts
@@ -115,6 +125,138 @@ snoop --severity critical
 snoop --format json --severity high > audit.json
 ```
 
+## Python Support
+
+Snoop now supports Python projects in addition to Node.js! It will automatically detect Python manifest files and run `pip-audit` if available.
+
+### Supported Python Manifest Files
+
+- **requirements.txt**: Standard pip requirements file
+- **Pipfile**: Pipenv dependency file
+- **pyproject.toml**: Modern Python project configuration (PEP 518)
+- **poetry.lock**: Poetry lock file (detection only, audited via pyproject.toml)
+- **Pipfile.lock**: Pipenv lock file (detection only, audited via Pipfile)
+
+### Installing pip-audit
+
+```bash
+# Install globally
+pip install pip-audit
+
+# Or with pipx (recommended)
+pipx install pip-audit
+
+# Verify installation
+pip-audit --version
+```
+
+### Mixed Projects
+
+Snoop can handle projects with both Node.js and Python dependencies:
+
+```bash
+# Scan a project with both package.json and requirements.txt
+snoop --path ./my-full-stack-project
+
+# Output will include both Node.js and Python vulnerabilities
+```
+
+### Python-Only Projects
+
+```bash
+# Scan a Python project
+snoop --path ./my-python-project
+
+# If npm is not installed, Snoop will skip Node.js audit
+# Only pip-audit will run
+```
+
+### Notes
+
+- Python virtual environments (venv, .venv, env, __pycache__) are automatically skipped during scanning
+- Python vulnerability checking uses the built-in OSV API - no external tools required!
+
+## Go Support
+
+Snoop has built-in support for Go modules using the OSV (Open Source Vulnerabilities) API!
+
+### Supported Go Files
+
+- **go.mod**: Go module definition file (primary audit source)
+- **go.sum**: Go checksums file (detected for completeness)
+
+### Native Go Scanning
+
+**No external tools required!** Snoop uses the OSV API directly to check Go modules for vulnerabilities.
+
+```bash
+# Scan a Go project
+snoop --path ./my-go-project
+
+# Both Node.js and Go in same project
+snoop --path ./my-full-stack-project
+```
+
+### Example Output
+
+```
+Go Module: myproject/go.mod
+Found 3 vulnerabilities:
+  High: 3
+
+Module                                   Version      Vulnerability ID     Fix Versions
+-------------------------------------------------------------------------------------
+golang.org/x/net                         v0.0.0-2019  GO-2020-0015        0.0.0-20200226101357, 0.0.0-20200226101357
+github.com/gin-gonic/gin                 v1.6.0       GHSA-3vp4-m3rf-...   1.9.0
+```
+
+### Notes
+
+- Go vendor directories are automatically skipped during scanning
+- Only `go.mod` files are audited; `go.sum` is detected but not separately audited
+- Uses the official Go vulnerability database via OSV API
+
+## Maven/Java Support
+
+Snoop has built-in support for Maven projects using the OSV (Open Source Vulnerabilities) API!
+
+### Supported Maven Files
+
+- **pom.xml**: Maven Project Object Model file (primary audit source)
+
+### Native Maven Scanning
+
+**No external tools required!** Snoop uses the OSV API directly to check Maven dependencies for vulnerabilities.
+
+```bash
+# Scan a Maven project
+snoop --path ./my-java-project
+
+# Mixed ecosystem project (Node.js, Python, Go, and Maven)
+snoop --path ./my-full-stack-project
+```
+
+### Example Output
+
+```
+Maven Project: myproject/pom.xml
+Found 7 vulnerabilities:
+  High: 7
+
+Dependency                               Version      Vulnerability ID     Fix Versions
+-------------------------------------------------------------------------------------
+org.apache.logging.log4j:log4j-core      2.14.1       GHSA-jfh8-c2jp-...   2.15.0, 2.3.1, 2.12.2
+com.fasterxml.jackson.core:jackson-...   2.9.8        GHSA-57j2-w4cx-...   2.13.2.1, 2.12.6.1
+org.springframework:spring-core          5.2.0.R...   GHSA-6gf2-pvqw-...   5.3.14, 5.2.19
+```
+
+### Notes
+
+- Maven target directories are automatically skipped during scanning
+- Only `pom.xml` files are audited
+- Dependencies without explicit versions (managed by parent POMs or BOMs) are skipped
+- Uses the official Maven vulnerability database via OSV API
+
 ## Output
 
 ### Table Format
@@ -196,8 +338,10 @@ Found **4** manifest file(s):
 ### Prerequisites
 
 - Go 1.21 or later
-- npm (for running audits)
+- npm (for running Node.js audits only - Python, Go, and Maven use built-in vulnerability checking)
 - make
+
+**Note:** Python, Go, and Maven vulnerability scanning is built-in using the OSV API - no external tools required!
 
 ### Building from Source
 
@@ -321,7 +465,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Built with [Cobra](https://github.com/spf13/cobra) for CLI
-- Uses npm's security audit API
+- Uses npm's security audit API for Node.js packages
+- Uses [OSV (Open Source Vulnerabilities)](https://osv.dev) API for Python, Go, and Maven packages
 - Inspired by the need for better supply chain security
 
 ## Support
@@ -330,4 +475,4 @@ For bugs, questions, and discussions please use the [GitHub Issues](https://gith
 
 ---
 
-**Made with ❤️ for secure Node.js development**
+**Made with ❤️ for secure software development**

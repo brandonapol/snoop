@@ -1,0 +1,29 @@
+# Python dependencies with known vulnerabilities (for testing purposes)
+# DO NOT use these versions in production!
+
+# Flask - older version with security issues
+Flask==1.0.2
+
+# Django - older version with CVEs
+Django==2.2.0
+
+# requests - older version with vulnerabilities
+requests==2.20.0
+
+# urllib3 - older version with security issues
+urllib3==1.24.1
+
+# Pillow - older version with CVEs
+Pillow==6.0.0
+
+# cryptography - older version with known issues
+cryptography==2.6.1
+
+# PyYAML - older version with arbitrary code execution vulnerability
+PyYAML==5.1
+
+# Jinja2 - older version with XSS vulnerabilities
+Jinja2==2.10.0
+
+# SQLAlchemy - older version
+SQLAlchemy==1.3.0
