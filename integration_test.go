@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// Cleanup
-	os.Remove("snoop-test")
+	_ = os.Remove("snoop-test")
 
 	os.Exit(code)
 }
@@ -96,7 +96,9 @@ func TestRequirement_CLI_FormatFlag(t *testing.T) {
 	// Requirement: `--format` for output format (json, table, markdown)
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	formats := []string{"json", "table", "markdown"}
 
@@ -135,7 +137,9 @@ func TestRequirement_CLI_SeverityFlag(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	for _, severity := range severities {
 		t.Run(severity, func(t *testing.T) {
@@ -159,7 +163,9 @@ func TestRequirement_CLI_VerboseFlag(t *testing.T) {
 	// Requirement: `--verbose` for detailed output
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	// Run without verbose
 	cmdNormal := exec.Command("./snoop-test", "--path", tmpDir)
@@ -182,7 +188,9 @@ func TestRequirement_DetectPackageJSON(t *testing.T) {
 	// Requirement: Detect `package.json`
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -214,9 +222,13 @@ func TestRequirement_DetectPackageLockJSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	// Need package.json too for audit to run
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 	packageLock := filepath.Join(tmpDir, "package-lock.json")
-	os.WriteFile(packageLock, []byte(`{"name":"test","lockfileVersion":2}`), 0644)
+	if err := os.WriteFile(packageLock, []byte(`{"name":"test","lockfileVersion":2}`), 0644); err != nil {
+		t.Fatalf("Failed to write package-lock.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -244,9 +256,13 @@ func TestRequirement_DetectYarnLock(t *testing.T) {
 	tmpDir := t.TempDir()
 	// Need package.json too for audit to run
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 	yarnLock := filepath.Join(tmpDir, "yarn.lock")
-	os.WriteFile(yarnLock, []byte(`# yarn lockfile v1`), 0644)
+	if err := os.WriteFile(yarnLock, []byte(`# yarn lockfile v1`), 0644); err != nil {
+		t.Fatalf("Failed to write yarn.lock: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -274,9 +290,13 @@ func TestRequirement_DetectPnpmLockYAML(t *testing.T) {
 	tmpDir := t.TempDir()
 	// Need package.json too for audit to run
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 	pnpmLock := filepath.Join(tmpDir, "pnpm-lock.yaml")
-	os.WriteFile(pnpmLock, []byte(`lockfileVersion: 5.4`), 0644)
+	if err := os.WriteFile(pnpmLock, []byte(`lockfileVersion: 5.4`), 0644); err != nil {
+		t.Fatalf("Failed to write pnpm-lock.yaml: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -303,7 +323,9 @@ func TestRequirement_ReturnFullPaths(t *testing.T) {
 	// Requirement: Return list of detected files with their full paths
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -347,7 +369,9 @@ func TestRequirement_CheckNpmInstalled(t *testing.T) {
 	// Requirement: Check if npm is installed before attempting audit
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -373,11 +397,13 @@ func TestRequirement_ParseNpmAuditJSON(t *testing.T) {
 			"lodash": "4.17.19"
 		}
 	}`
-	os.WriteFile(packageJSON, []byte(packageContent), 0644)
+	if err := os.WriteFile(packageJSON, []byte(packageContent), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	// Run npm install to create node_modules (if npm is available)
 	npmInstall := exec.Command("npm", "install", "--prefix", tmpDir)
-	npmInstall.Run() // Ignore error as npm might not be available
+	_ = npmInstall.Run() // Ignore error as npm might not be available
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -397,7 +423,9 @@ func TestRequirement_VulnerabilityDataStructure(t *testing.T) {
 	// Requirement: Vulnerability struct with: name, severity, description, CVE, affected versions
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -428,7 +456,9 @@ func TestRequirement_SummaryDataStructure(t *testing.T) {
 	// Requirement: Summary struct with: total vulnerabilities by severity
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -459,7 +489,9 @@ func TestRequirement_JSONFormatter_Metadata(t *testing.T) {
 	// Requirement: JSON formatter with metadata (timestamp, directory, tool version)
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -488,7 +520,9 @@ func TestRequirement_JSONFormatter_VulnerabilitiesArray(t *testing.T) {
 	// Requirement: Array of vulnerabilities in JSON output
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()
@@ -508,7 +542,9 @@ func TestRequirement_TableFormatter_ColorCoding(t *testing.T) {
 	// Requirement: Color coding by severity (red=critical, orange=high, yellow=medium)
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "table")
 	output, _ := cmd.CombinedOutput()
@@ -527,7 +563,9 @@ func TestRequirement_MarkdownFormatter_Tables(t *testing.T) {
 	// Requirement: Generate markdown tables
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "markdown")
 	output, _ := cmd.CombinedOutput()
@@ -550,7 +588,9 @@ func TestRequirement_MarkdownFormatter_Summary(t *testing.T) {
 	// Requirement: Include summary at top of markdown
 	tmpDir := t.TempDir()
 	packageJSON := filepath.Join(tmpDir, "package.json")
-	os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644)
+	if err := os.WriteFile(packageJSON, []byte(`{"name":"test","version":"1.0.0","dependencies":{}}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "markdown")
 	output, _ := cmd.CombinedOutput()
@@ -589,10 +629,18 @@ func TestRequirement_MultipleManifests(t *testing.T) {
 	// Requirement: Handle multiple manifest files
 	tmpDir := t.TempDir()
 
-	os.WriteFile(filepath.Join(tmpDir, "package.json"), []byte(`{"name":"test","version":"1.0.0"}`), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "package-lock.json"), []byte(`{"name":"test"}`), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "yarn.lock"), []byte(`# yarn`), 0644)
-	os.WriteFile(filepath.Join(tmpDir, "pnpm-lock.yaml"), []byte(`lockfileVersion: 5.4`), 0644)
+	if err := os.WriteFile(filepath.Join(tmpDir, "package.json"), []byte(`{"name":"test","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package.json: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpDir, "package-lock.json"), []byte(`{"name":"test"}`), 0644); err != nil {
+		t.Fatalf("Failed to write package-lock.json: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpDir, "yarn.lock"), []byte(`# yarn`), 0644); err != nil {
+		t.Fatalf("Failed to write yarn.lock: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpDir, "pnpm-lock.yaml"), []byte(`lockfileVersion: 5.4`), 0644); err != nil {
+		t.Fatalf("Failed to write pnpm-lock.yaml: %v", err)
+	}
 
 	cmd := exec.Command("./snoop-test", "--path", tmpDir, "--format", "json")
 	output, _ := cmd.CombinedOutput()

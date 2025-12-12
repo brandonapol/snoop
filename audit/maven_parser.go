@@ -16,10 +16,10 @@ type MavenDependency struct {
 
 // PomProject represents the root element of a pom.xml file
 type PomProject struct {
-	XMLName      xml.Name           `xml:"project"`
-	Dependencies PomDependencies    `xml:"dependencies"`
-	Parent       *PomParent         `xml:"parent"`
-	Properties   map[string]string  `xml:"-"`
+	XMLName       xml.Name          `xml:"project"`
+	Dependencies  PomDependencies   `xml:"dependencies"`
+	Parent        *PomParent        `xml:"parent"`
+	Properties    map[string]string `xml:"-"`
 	PropertiesRaw xml.Name          `xml:"properties"`
 }
 
@@ -49,7 +49,11 @@ func ParsePomXML(filepath string) ([]MavenDependency, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open pom.xml: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
 
 	var project PomProject
 	decoder := xml.NewDecoder(file)
@@ -66,12 +70,7 @@ func ParsePomXML(filepath string) ([]MavenDependency, error) {
 
 		// Skip test and provided scope dependencies (optional - could include these)
 		// For now, we'll include all dependencies to be thorough
-		mavenDep := MavenDependency{
-			GroupID:    dep.GroupID,
-			ArtifactID: dep.ArtifactID,
-			Version:    dep.Version,
-			Scope:      dep.Scope,
-		}
+		mavenDep := MavenDependency(dep)
 
 		dependencies = append(dependencies, mavenDep)
 	}

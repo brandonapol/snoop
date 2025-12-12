@@ -21,7 +21,11 @@ func ParseRequirementsTxt(filepath string) ([]PythonPackage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open requirements.txt: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
 
 	var packages []PythonPackage
 	scanner := bufio.NewScanner(file)
@@ -30,6 +34,7 @@ func ParseRequirementsTxt(filepath string) ([]PythonPackage, error) {
 	// Regex to match package specifications
 	// Matches: package==1.0.0, package>=1.0.0, package~=1.0, etc.
 	pkgRegex := regexp.MustCompile(`^([a-zA-Z0-9\-_\.]+)\s*([=<>~!]+)\s*([0-9\.\*]+.*)$`)
+	simplePkgRegex := regexp.MustCompile(`^[a-zA-Z0-9\-_\.]+$`)
 
 	for scanner.Scan() {
 		lineNum++
@@ -72,7 +77,7 @@ func ParseRequirementsTxt(filepath string) ([]PythonPackage, error) {
 			}
 		} else {
 			// Try simple package name without version
-			if matched, _ := regexp.MatchString(`^[a-zA-Z0-9\-_\.]+$`, line); matched {
+			if simplePkgRegex.MatchString(line) {
 				packages = append(packages, PythonPackage{
 					Name:    line,
 					Version: "", // No version specified
@@ -95,7 +100,11 @@ func ParsePipfile(filepath string) ([]PythonPackage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Pipfile: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
 
 	var packages []PythonPackage
 	scanner := bufio.NewScanner(file)
@@ -158,7 +167,11 @@ func ParsePyprojectToml(filepath string) ([]PythonPackage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open pyproject.toml: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
 
 	var packages []PythonPackage
 	scanner := bufio.NewScanner(file)

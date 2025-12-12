@@ -31,12 +31,12 @@ type GoVulnerability struct {
 
 // GoAuditResult contains the results of running Go vulnerability check
 type GoAuditResult struct {
-	ManifestPath     string
-	ManifestType     string
-	Vulnerabilities  []GoVulnerability
-	Summary          VulnerabilitySummary
-	ModulesScanned   int
-	Error            error
+	ManifestPath    string
+	ManifestType    string
+	Vulnerabilities []GoVulnerability
+	Summary         VulnerabilitySummary
+	ModulesScanned  int
+	Error           error
 }
 
 // ParseGoMod parses a go.mod file and extracts dependencies
@@ -45,7 +45,11 @@ func ParseGoMod(filepath string) ([]GoModule, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open go.mod: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}()
 
 	var modules []GoModule
 	scanner := bufio.NewScanner(file)

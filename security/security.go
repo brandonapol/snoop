@@ -98,10 +98,10 @@ func min(a, b, c int) int {
 
 // TyposquattingRisk represents a potential typosquatting risk
 type TyposquattingRisk struct {
-	PackageName    string
-	SimilarTo      string
-	Distance       int
-	Confidence     string // "high", "medium", "low"
+	PackageName string
+	SimilarTo   string
+	Distance    int
+	Confidence  string // "high", "medium", "low"
 }
 
 // CheckTyposquatting checks if a package name is similar to popular packages
@@ -183,7 +183,11 @@ func FetchPackageMetadata(packageName string) (*PackageMetadata, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch metadata: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close response body: %w", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("npm registry returned status %d", resp.StatusCode)
@@ -216,11 +220,11 @@ func FetchPackageMetadata(packageName string) (*PackageMetadata, error) {
 
 // MaintainerRisk represents risks related to package maintenance
 type MaintainerRisk struct {
-	PackageName      string
-	Issues           []string
-	RiskLevel        string // "high", "medium", "low"
-	LastUpdate       time.Time
-	MaintainerCount  int
+	PackageName     string
+	Issues          []string
+	RiskLevel       string // "high", "medium", "low"
+	LastUpdate      time.Time
+	MaintainerCount int
 }
 
 // AnalyzeMaintainerRisk analyzes maintenance-related risks
@@ -262,10 +266,10 @@ func AnalyzeMaintainerRisk(metadata *PackageMetadata) *MaintainerRisk {
 
 // SuspiciousPattern represents a suspicious pattern in package.json
 type SuspiciousPattern struct {
-	PackageName  string
-	ScriptType   string   // "install", "preinstall", "postinstall"
+	PackageName   string
+	ScriptType    string // "install", "preinstall", "postinstall"
 	ScriptContent string
-	RiskLevel    string
+	RiskLevel     string
 }
 
 // DetectSuspiciousPatterns checks for suspicious install scripts

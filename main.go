@@ -134,7 +134,6 @@ Examples:
 			if verbose && format == "table" {
 				fmt.Println("\nNo package.json files found. Skipping npm audit.")
 			}
-			hasNodeJS = false
 		}
 
 		if verbose && format == "table" {

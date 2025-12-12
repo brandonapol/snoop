@@ -24,9 +24,9 @@ const (
 
 // Package represents a package to query
 type Package struct {
-	Name      string     `json:"name"`
-	Version   string     `json:"version,omitempty"`
-	Ecosystem Ecosystem  `json:"ecosystem"`
+	Name      string    `json:"name"`
+	Version   string    `json:"version,omitempty"`
+	Ecosystem Ecosystem `json:"ecosystem"`
 }
 
 // QueryRequest represents the OSV API query request
@@ -48,11 +48,11 @@ type Reference struct {
 
 // Affected represents affected package versions
 type Affected struct {
-	Package           Package          `json:"package"`
-	Ranges            []VersionRange   `json:"ranges,omitempty"`
-	Versions          []string         `json:"versions,omitempty"`
-	EcosystemSpecific map[string]any   `json:"ecosystem_specific,omitempty"`
-	DatabaseSpecific  map[string]any   `json:"database_specific,omitempty"`
+	Package           Package        `json:"package"`
+	Ranges            []VersionRange `json:"ranges,omitempty"`
+	Versions          []string       `json:"versions,omitempty"`
+	EcosystemSpecific map[string]any `json:"ecosystem_specific,omitempty"`
+	DatabaseSpecific  map[string]any `json:"database_specific,omitempty"`
 }
 
 // VersionRange represents a version range
@@ -63,8 +63,8 @@ type VersionRange struct {
 
 // Event represents a version event (introduced/fixed)
 type Event struct {
-	Introduced string `json:"introduced,omitempty"`
-	Fixed      string `json:"fixed,omitempty"`
+	Introduced   string `json:"introduced,omitempty"`
+	Fixed        string `json:"fixed,omitempty"`
 	LastAffected string `json:"last_affected,omitempty"`
 }
 
@@ -117,7 +117,11 @@ func (c *Client) QueryPackage(pkg Package) (*QueryResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query OSV API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close response body: %w", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
