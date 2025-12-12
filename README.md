@@ -1,5 +1,17 @@
 # Snoop - Multi-Language Security Audit CLI
 
+> **🏆 Vibelympics Coding Competition - Round 2 Submission**
+>
+> This project was created for the [Vibelympics coding competition](https://github.com/brandonapol/vibelympics). It is maintained as a git submodule at `/round_2` in the main vibelympics repository.
+>
+> **Why a submodule?** To keep Go module imports clean and properly scoped (e.g., `github.com/brandonapol/snoop/audit` instead of `github.com/brandonapol/vibelympics/round_2/snoop/audit`). This approach maintains proper Go module structure while allowing the competition repository to reference this work.
+>
+> **For Graders:** You can access this project at:
+> - Main repository: https://github.com/brandonapol/snoop
+> - As submodule: https://github.com/brandonapol/vibelympics/tree/main/round_2
+
+---
+
 A comprehensive command-line security audit tool for Node.js, Python, Go, and Maven/Java projects. Snoop automatically detects package manifests, runs security audits using built-in vulnerability databases, and identifies potential supply chain risks including typosquatting, outdated packages, and suspicious patterns.
 
 ## Features
