@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build binaries
+        run: |
+          # Create build directory
+          mkdir -p build
+
+          # Build for all platforms
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o build/snoop-linux-amd64 .
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o build/snoop-linux-arm64 .
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o build/snoop-darwin-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o build/snoop-darwin-arm64 .
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o build/snoop-windows-amd64.exe .
+
+      - name: Generate checksums
+        run: |
+          cd build
+          sha256sum snoop-* > checksums.txt
+          cat checksums.txt
+
+      - name: Create Release Notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## Snoop ${{ steps.version.outputs.VERSION }}
+
+          A multi-language security audit tool for Node.js, Python, Go, and Maven/Java projects.
+
+          ### Installation
+
+          #### Linux (x86_64)
+          ```bash
+          curl -sSL https://github.com/brandonapol/snoop/releases/download/${{ steps.version.outputs.VERSION }}/snoop-linux-amd64 -o /usr/local/bin/snoop
+          chmod +x /usr/local/bin/snoop
+          ```
+
+          #### macOS (Apple Silicon)
+          ```bash
+          curl -sSL https://github.com/brandonapol/snoop/releases/download/${{ steps.version.outputs.VERSION }}/snoop-darwin-arm64 -o /usr/local/bin/snoop
+          chmod +x /usr/local/bin/snoop
+          ```
+
+          #### macOS (Intel)
+          ```bash
+          curl -sSL https://github.com/brandonapol/snoop/releases/download/${{ steps.version.outputs.VERSION }}/snoop-darwin-amd64 -o /usr/local/bin/snoop
+          chmod +x /usr/local/bin/snoop
+          ```
+
+          #### Using Go
+          ```bash
+          go install github.com/brandonapol/snoop@${{ steps.version.outputs.VERSION }}
+          ```
+
+          ### Verify Installation
+          ```bash
+          snoop --version
+          ```
+
+          ### Features
+          - 🔍 Multi-language support: Node.js, Python, Go, Maven/Java
+          - 🛡️ Built-in vulnerability scanning using OSV API
+          - 📊 Multiple output formats: JSON, Table, Markdown
+          - 🎯 Severity filtering
+          - 🔒 Typosquatting detection
+          - ✅ No external tools required (except npm for Node.js)
+
+          ### Checksums (SHA256)
+          See `checksums.txt` for file integrity verification.
+          EOF
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/snoop-linux-amd64
+            build/snoop-linux-arm64
+            build/snoop-darwin-amd64
+            build/snoop-darwin-arm64
+            build/snoop-windows-amd64.exe
+            build/checksums.txt
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
